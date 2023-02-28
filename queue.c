@@ -129,12 +129,10 @@ bool q_delete_mid(struct list_head *head)
 
     // https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
     struct list_head *slow = head->next, *fast = head->next;
-    fast = fast->next;
 
     while ((fast != head) && (fast->next != head)) {
         slow = slow->next;
-        fast = fast->next;
-        fast = fast->next;
+        fast = fast->next->next;
     }
 
     element_t *item = list_entry(slow, element_t, list);
@@ -184,18 +182,7 @@ bool q_delete_dup(struct list_head *head)
 void q_swap(struct list_head *head)
 {
     // https://leetcode.com/problems/swap-nodes-in-pairs/
-    struct list_head *pos, *safe;
-
-    list_for_each_safe (pos, safe, head) {
-        if (safe == head)
-            return;
-
-        pos->next = safe->next;
-        safe->prev = pos->prev;
-
-        pos->prev = safe;
-        safe->next = pos;
-    }
+    q_reverseK(head, 2);
 }
 
 /* Reverse elements in queue */
@@ -261,9 +248,8 @@ int q_descend(struct list_head *head)
          pos = safe, safe = pos->prev) {
         item = list_entry(pos, element_t, list);
         if (strcmp(cmp, item->value) >= 0) {
-            free(item->value);
-            free(item);
             list_del(pos);
+            q_release_element(item);
         } else {
             cmp = item->value;
         }
