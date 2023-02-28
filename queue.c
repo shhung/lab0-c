@@ -231,42 +231,29 @@ void q_reverseK(struct list_head *head, int k)
     list_splice(&newList, head);
 }
 
-void merge_two_lists(struct list_head *left, struct list_head *right)
+void merge_two_lists(struct list_head *left,
+                     struct list_head *right,
+                     struct list_head *result)
 {
-    if (list_empty(left)) {
-        list_splice(right, left);
-        return;
-    } else {
-        return;
-    }
-    LIST_HEAD(tmp);
-    struct list_head *left_itr = left->next, *right_itr = right->next, *toMerge;
     element_t *left_item, *right_item;
-    left_item = list_entry(left_itr, element_t, list);
-    right_item = list_entry(right_itr, element_t, list);
-
+    left_item = list_first_entry(left, element_t, list);
+    right_item = list_first_entry(right, element_t, list);
     while (!list_empty(left) && !list_empty(right)) {
         if (strcmp(left_item->value, right_item->value) < 0) {
-            toMerge = left_itr;
-            left_itr = left_itr->next;
-            left_item = list_entry(left_itr, element_t, list);
-            list_move_tail(toMerge, &tmp);
+            list_move_tail(&left_item->list, result);
+            left_item = list_first_entry(left, element_t, list);
         } else {
-            toMerge = right_itr;
-            right_itr = right_itr->next;
-            right_item = list_entry(right_itr, element_t, list);
-            list_move_tail(toMerge, &tmp);
+            list_move_tail(&right_item->list, result);
+            right_item = list_first_entry(right, element_t, list);
         }
     }
-    list_splice(right, left);
-    list_splice(&tmp, left);
+    list_splice_tail(left, result);
+    list_splice_tail(right, result);
 }
 
 /* Sort elements of queue in ascending order */
 void q_sort(struct list_head *head)
 {
-    if (!head)
-        return;
     if (list_empty(head))
         return;
     if (list_is_singular(head))
@@ -278,13 +265,13 @@ void q_sort(struct list_head *head)
         fast = fast->next->next;
     }
 
+    LIST_HEAD(left);
     LIST_HEAD(right);
-    list_cut_position(&right, head, slow);
-
-    q_sort(head);
+    list_splice_tail_init(head, &right);
+    list_cut_position(&left, &right, slow);
+    q_sort(&left);
     q_sort(&right);
-
-    merge_two_lists(head, &right);
+    merge_two_lists(&left, &right, head);
 }
 
 /* Remove every node which has a node with a strictly greater value anywhere to
