@@ -14,7 +14,7 @@
 /* Create an empty queue */
 struct list_head *q_new()
 {
-    struct list_head *head = malloc(sizeof(struct list_head));
+    struct list_head *head = malloc(sizeof(*head));
     if (!head)
         return NULL;
     INIT_LIST_HEAD(head);
@@ -259,11 +259,11 @@ void q_sort(struct list_head *head)
     if (list_is_singular(head))
         return;
 
-    struct list_head *slow = head->next, *fast = head->next;
-    while ((fast != head) && (fast->next != head)) {
-        slow = slow->next;
+    struct list_head *slow = head, *fast = head;
+    do {
         fast = fast->next->next;
-    }
+        slow = slow->next;
+    } while (fast != head && fast->next != head);
 
     LIST_HEAD(left);
     LIST_HEAD(right);
@@ -301,6 +301,15 @@ int q_descend(struct list_head *head)
 /* Merge all the queues into one sorted queue, which is in ascending order */
 int q_merge(struct list_head *head)
 {
-    // https://leetcode.com/problems/merge-k-sorted-lists/
+    //     // https://leetcode.com/problems/merge-k-sorted-lists/
+    //     LIST_HEAD(merged_list);
+    //     queue_contex_t *pos;
+    //     list_for_each_entry (pos, head, chain) {
+    //         list_splice_tail(pos->q, &merged_list);
+    //     }
+
+    //     q_sort(&merged_list);
+    //     pos = list_first_entry(head, queue_contex_t, chain);
+    //     list_splice_tail(&merged_list, pos->q);
     return 0;
 }
